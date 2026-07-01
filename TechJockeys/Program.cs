@@ -1,3 +1,5 @@
+using AspNet.Security.OAuth.GitHub;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TechJockeys.Data;
@@ -14,6 +16,17 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>() // authorization (roles / permissions) NOT enabled by default, must manually enable
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthentication()
+    .AddGoogle(options => {
+        options.ClientId = builder.Configuration.GetSection("Authentication:Google")["ClientId"] ?? "";
+        options.ClientSecret = builder.Configuration.GetSection("Authentication:Google")["ClientSecret"] ?? "";
+    })
+    .AddGitHub(options => {
+        options.ClientId = builder.Configuration.GetSection("Authentication:GitHub")["ClientId"] ?? "";
+        options.ClientSecret = builder.Configuration.GetSection("Authentication:GitHub")["ClientSecret"] ?? "";
+    });
+
 
 var app = builder.Build();
 
@@ -32,6 +45,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
